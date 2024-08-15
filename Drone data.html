@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flight Data</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -14,17 +15,11 @@
             background-size: cover; 
             background-position: center; 
             background-repeat: no-repeat; 
-            margin: 0;
-            padding: 0;
-            font-family: 'Montserrat', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
     </style>
 
     <div class="data" style="display: flex; align-items: center;">
-        <h1 style="margin-left: 0;">
+        <h1 style="margin-left: 0px;">
             <img src="logo.png" alt="Flight Data" width="60" height="60" style="vertical-align: middle;">
             Flight
         </h1>
@@ -32,18 +27,15 @@
     </div> 
     
     <div class="camera-feed">
-        <h4>
-            <img src="Background.jpg" alt="background" style="width: 100%; height: auto; border-radius: 20px; object-fit: cover;">
-            Camera Feed
-        </h4>
+        <h4><img src="Background.jpg" alt="background">Camera Feed</h4>
     </div>
 
     <div class="parent-container">
         <div class="data-container">
             <div class="drone-details">
-                <h2 style="margin-right: 0; margin-top: -10%; margin-bottom: 0;">
-                    <img src="Drone.png" alt="Drone type" width="150" height="160" style="vertical-align: middle;">
-                    AG Drone
+                <h2 style="margin-right: 0px; margin-top: -10%; margin-bottom: 0%;">
+                   <img src="Drone.png" alt="Drone type" width="150" height="160" style="vertical-align: middle;">
+                   AG Drone
                 </h2>
                 <p class="onlinestatus" id="onlinestatus">OFFLINE</p>
             </div>
@@ -59,17 +51,15 @@
 
             <div class="data-item">
                 <div class="sensor">
-                    <h2 style="margin-left: 0;">
+                    <h2 style="margin-left: 0px;">
                         <img src="temperature.png" alt="temp icon" width="25" height="25" style="vertical-align: middle;">
-                        Temperature
-                    </h2>
+                        Temperature</h2>
                     <p class="value" id="temperature">Loading...</p>
                 </div>
                 <div class="sensor">
-                    <h2 style="margin-left: 0;">
+                    <h2 style="margin-left: 0px;">
                         <img src="humidity.png" alt="hum icon" width="25" height="25" style="vertical-align: middle;">
-                        Humidity
-                    </h2>
+                        Humidity</h2>
                     <p class="value" id="humidity">Loading...</p>
                 </div>
             </div>
@@ -78,15 +68,13 @@
                 <div class="stdata">
                     <h3 style="margin-right: 2px;">
                         <img src="speedometer.png" alt="speed icon" width="25" height="25" style="vertical-align: middle;">
-                        Speed
-                    </h3>
+                        Speed</h3>
                     <p class="d" id="speed">Loading...</p>
                 </div>
                 <div class="stdata">
                     <h3 style="margin-right: 2px;">
                         <img src="time-left.png" alt="time icon" width="25" height="25" style="vertical-align: middle;">
-                        Flight Time
-                    </h3>
+                        Flight Time</h3>
                     <p class="d" id="time">Loading...</p>
                 </div>
             </div>
@@ -98,22 +86,23 @@
         <div class="compass-circle"></div>
     </div>
     
+
     <div class="map-container">
         <div class="datamap"></div>
-        <div id="map" style="height: 250px; width: 100%; margin-left: 3%; border-radius: 20px;"></div>
+        <div id="map"></div>
         <div class="waterlevel-container">
             <h1>Water Level</h1>
             <div class="levelc">
-                <div class="water-level" id="water-level" style="height: 50px; background-color: #0055ff; border-radius: 5px; transition: width 0.3s; margin-left: 5%; margin-right: 50%;"></div>
-                <div class="water-tip"></div>
-                <p class="water-status" id="water-status">Loading...</p>
-                <div class="water-tank">
-                    <h1 img="Drone tank.png" alt="tank icon" width="75" height="75" style="vertical-align: middle;"></h1>
-                </div>
+                <div class="water-level" id="water-level"></div>
+            <div class="water-tip"></div>
+            <p class="water-status" id="water-status">Loading...</p>
+            <div class="water-tank">
+                <h1 img="Drone tank.png" alt="tank icon" width="75" height="75" style="vertical-align: middle;"></h1>
+            </div>
             </div>
 
             <div class="Button">
-                <button class="button" style="width: 180px; height: 180px; border-radius: 20%; background-color: #fcb10e; margin-top: -20%; margin-left: 65%; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 30px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), inset 0 5px 10px rgba(255, 255, 255, 0.5); border: 1px solid #b3b3b3; background: linear-gradient(145deg, #fcb10e, #f9b21a); text-align: center; line-height: 180px; color: #333; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; cursor: pointer;">START</button>
+                <button class="button">START</button>
             </div>
         </div>
     </div>

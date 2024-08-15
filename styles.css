@@ -325,9 +325,9 @@
  }
 
  .button {
-    width: 80px;
+    width: 140px;
     height: 80px;
-    border-radius: 20%;
+    border-radius:20%;
     background-color: #fcb10e;
     margin-top: -20%;
     margin-left: 65%;

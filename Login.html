@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Flight Data</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-container {
+            background-color: #1c1c1c;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            width: 300px;
+        }
+
+        .login-container h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .login-container label {
+            display: block;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #fbac01;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background-color: #df9902;
+        }
+
+        .login-container p {
+            text-align: center;
+            color: #ffffff;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .login-container p a {
+            color: #fbac01;
+            text-decoration: none;
+        }
+
+        .login-container p a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="register.html">Register</a></p>
+    </div>
+
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRfzvsd3KLj9Ux-uOTPO8voAD3Q4yhhhc",
+            authDomain: "drone-data-233ef.firebaseapp.com",
+            databaseURL: "https://drone-data-233ef-default-rtdb.firebaseio.com",
+            projectId: "drone-data-233ef",
+            storageBucket: "drone-data-233ef.appspot.com",
+            messagingSenderId: "895060695821",
+            appId: "1:895060695821:web:98e9a092bb78620b206e44"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    const userId = user.uid;
+                    if (userId === 'XAcsHGw2q7WFu0fNBstFQ7h2xX33') {
+                        alert("Login successful for specific user!");
+                        window.location.href = 'Drone data.html'; // Redirect to dashboard after login
+                    } else {
+                        alert("Login successful!");
+                        window.location.href = 'another_page.html'; // Redirect to another page for other users
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        });
+    </script>
+
+</body>
+</html>

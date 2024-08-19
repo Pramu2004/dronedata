@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Flight Data</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .register-container {
+            background-color: #1c1c1c;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            width: 300px;
+        }
+
+        .register-container h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .register-container label {
+            display: block;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .register-container input[type="text"],
+        .register-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .register-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #fbac01;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .register-container button:hover {
+            background-color: #df9902;
+        }
+
+        .register-container p {
+            text-align: center;
+            color: #ffffff;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .register-container p a {
+            color: #fbac01;
+            text-decoration: none;
+        }
+
+        .register-container p a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-container">
+        <h1>Register</h1>
+        <form id="register-form">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" required>
+
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="Login.html">Login</a></p>
+    </div>
+
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRfzvsd3KLj9Ux-uOTPO8voAD3Q4yhhhc",
+            authDomain: "drone-data-233ef.firebaseapp.com",
+            databaseURL: "https://drone-data-233ef-default-rtdb.firebaseio.com",
+            projectId: "drone-data-233ef",
+            storageBucket: "drone-data-233ef.appspot.com",
+            messagingSenderId: "895060695821",
+            appId: "1:895060695821:web:98e9a092bb78620b206e44"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match. Please try again.");
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert("Registration successful!");
+                    window.location.href = 'Drone data.html'; // Redirect to dashboard after registration
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        });
+    </script>    
+
+</body>
+</html>

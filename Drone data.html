@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Flight Data</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css">
     <style>
         body {
             background-color: #000000; 
@@ -16,7 +13,50 @@
             background-position: center; 
             background-repeat: no-repeat; 
         }
+        /* Style for notification */
+        .notification {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .notification.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification {
+            transform: translateY(-20px);
+        }
+
+        #logout-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4c4c;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #logout-btn:hover {
+            background-color: #cc0000;
+        }
     </style>
+</head>
+<body>
+
+    <button id="logout-btn">Logout</button>
 
     <div class="data" style="display: flex; align-items: center;">
         <h1 style="margin-left: 0px;">
@@ -25,7 +65,17 @@
         </h1>
         <h2>Data</h2>
     </div> 
-    
+
+    <!-- Pop-up Bar -->
+    <div id="popup-bar" class="popup-bar">
+        <span class="close-btn">×</span>
+        <span class="minimize-btn">≡</span>
+        <span class="minimize-icon">≡</span>
+        <p></p>
+        <button id="save-data-btn">SAVE DATA</button>
+        <button id="download-pdf-btn">DOWNLOAD</button>
+    </div>
+
     <div class="camera-feed">
         <h4><img src="Background.jpg" alt="background">Camera Feed</h4>
     </div>
@@ -85,7 +135,6 @@
         <h4>Drone</h4>
         <div class="compass-circle"></div>
     </div>
-    
 
     <div class="map-container">
         <div class="datamap"></div>
@@ -94,11 +143,11 @@
             <h1>Water Level</h1>
             <div class="levelc">
                 <div class="water-level" id="water-level"></div>
-            <div class="water-tip"></div>
-            <p class="water-status" id="water-status">Loading...</p>
-            <div class="water-tank">
-                <h1 img="Drone tank.png" alt="tank icon" width="75" height="75" style="vertical-align: middle;"></h1>
-            </div>
+                <div class="water-tip"></div>
+                <p class="water-status" id="water-status">Loading...</p>
+                <div class="water-tank">
+                    <img src="Drone tank.png" alt="tank icon" width="75" height="75" style="vertical-align: middle;">
+                </div>
             </div>
 
             <div class="Button">
@@ -110,13 +159,17 @@
     <!-- Leaflet.js script -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <!-- Firebase and JavaScript integration -->
+    <!-- jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- JavaScript code -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBRfzvsd3KLj9Ux-uOTPO8voAD3Q4yhhhc",
             authDomain: "drone-data-233ef.firebaseapp.com",
@@ -129,11 +182,29 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-
-        // Initialize Realtime Database and get a reference to the service
+        const auth = getAuth(app);
         const database = getDatabase(app);
 
-        // Reference to your database
+        // Authentication check
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'Login.html'; // Redirect to login page if not authenticated
+            }
+        });
+
+        // Logout function
+        function logout() {
+            signOut(auth).then(() => {
+                window.location.href = 'Login.html'; 
+            }).catch((error) => {
+                console.error("Error signing out: ", error);
+            });
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
+
+        // References to your database
         const onlineRef = ref(database, 'Online/Data');
         const dhtRef = ref(database, 'DHT22/Data');
         const locationRef = ref(database, 'Location/Data');
@@ -141,59 +212,29 @@
         const speedRef = ref(database, 'Accelerometer/Data');
         const waterRef = ref(database, 'Water level/Data');
 
-        //Online
+        // Online status
         onValue(onlineRef, (snapshot) => {
             const data = snapshot.val();
-            console.log("Speed Data snapshot: ", data);
-
-            if (data) {
-                const speed = data.status !== undefined ? data.status : "No data";
-                document.getElementById('speed').innerHTML = onlinestatus ;
-            } else {
-                console.log("Online Data is null");
-                document.getElementById('online').innerHTML = "No data";
-            }
+            document.getElementById('onlinestatus').innerHTML = data ? data.status || "No data" : "No data";
         }, (error) => {
-            console.error("Error fetching online data: ", error);
-            document.getElementById('online').innerHTML = "Error";
+            document.getElementById('onlinestatus').innerHTML = "Error";
         });
 
-        // Listen for changes in the DHT22 data
+        // DHT22 data
         onValue(dhtRef, (snapshot) => {
             const data = snapshot.val();
-            console.log("DHT22 Data snapshot: ", data);
-
-            if (data) {
-                const humidity = data.Humidity !== undefined ? data.Humidity : "No data";
-                const temperature = data.Temperature !== undefined ? data.Temperature : "No data";
-
-                document.getElementById('humidity').innerHTML = humidity + "%";
-                document.getElementById('temperature').innerHTML = temperature + "&#8451;";
-            } else {
-                console.log("DHT22 Data is null");
-                document.getElementById('humidity').innerHTML = "No data";
-                document.getElementById('temperature').innerHTML = "No data";
-            }
+            document.getElementById('temperature').innerHTML = data ? `${data.Temperature}℃` : "No data";
+            document.getElementById('humidity').innerHTML = data ? `${data.Humidity}%` : "No data";
         }, (error) => {
-            console.error("Error fetching DHT22 data: ", error);
-            document.getElementById('humidity').innerHTML = "Error";
             document.getElementById('temperature').innerHTML = "Error";
+            document.getElementById('humidity').innerHTML = "Error";
         });
 
-        // Listen for changes in the Battery data
+        // Battery data
         onValue(batteryRef, (snapshot) => {
             const data = snapshot.val();
-            console.log("Battery Data snapshot: ", data);
-
-            if (snapshot.exists()) {
-                const batteryLevel = data.level !== undefined ? data.level : 0;
-                updateBatteryLevel(batteryLevel);
-            } else {
-                console.log("No battery data available");
-                updateBatteryLevel(0);
-            }
+            updateBatteryLevel(data ? data.level : 0);
         }, (error) => {
-            console.error("Error fetching battery data: ", error);
             updateBatteryLevel(0);
         });
 
@@ -209,90 +250,53 @@
                 batteryLevel.style.backgroundColor = '#f9c74f';
             } else {
                 batteryLevel.style.backgroundColor = '#f94144';
+                if (level <= 20) {
+                    console.log("Battery level is 20% or below. Sending notification.");
+                    sendBatteryNotification();
+                }
             }
         }
 
-        // Listen for changes in the Speed data
+        // Speed data
         onValue(speedRef, (snapshot) => {
             const data = snapshot.val();
-            console.log("Speed Data snapshot: ", data);
-
-            if (data) {
-                const speed = data.Speed !== undefined ? data.Speed : "No data";
-                document.getElementById('speed').innerHTML = speed + " m/s";
-            } else {
-                console.log("Speed Data is null");
-                document.getElementById('speed').innerHTML = "No data";
-            }
+            document.getElementById('speed').innerHTML = data ? `${data.Speed} m/s` : "No data";
         }, (error) => {
-            console.error("Error fetching speed data: ", error);
             document.getElementById('speed').innerHTML = "Error";
         });
 
-        // Initialize the map
+        // Location data
         const map = L.map('map').setView([0, 0], 2);
-
-        // Add a tile layer to the map
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-
-        // Marker for the location
         let marker = L.marker([0, 0]).addTo(map);
 
-        // Listen for changes in the Location data
         onValue(locationRef, (snapshot) => {
             const locationData = snapshot.val();
-            console.log("Location Data snapshot: ", locationData);
-
             if (locationData) {
-                const latitude = locationData.Lattitude !== undefined ? locationData.Lattitude : null;
-                const longitude = locationData.Longitude !== undefined ? locationData.Longitude : null;
-
+                const { Lattitude: latitude, Longitude: longitude } = locationData;
                 if (latitude !== null && longitude !== null) {
-                    console.log("Setting map view to: ", latitude, longitude);
                     const latLng = [latitude, longitude];
                     map.setView(latLng, 13);
                     marker.setLatLng(latLng);
-                } else {
-                    console.log("Location data is incomplete: ", locationData);
                 }
-            } else {
-                console.log("Location data is null");
             }
         }, (error) => {
-            console.error("Error fetching location data: ", error);
+            console.error("Error fetching location data:", error);
         });
 
-        const compassCircle = document.querySelector(".compass-circle");
-        const startBtn = document.querySelector(".start-btn");
-
-        function startCompass() {
-            // Implement your compass logic here
-        }
-        startBtn.addEventListener("click", startCompass);
-
-        // Water level
+        // Water level data
         onValue(waterRef, (snapshot) => {
             const data = snapshot.val();
-            console.log("Water Data snapshot: ", data);
-
-            if (snapshot.exists()) {
-                const waterLevel = data.level !== undefined ? data.level : 0;
-                updateWaterLevel(waterLevel);
-            } else {
-                console.log("No water data available");
-                updateWaterLevel(0);
-            }
+            updateWaterLevel(data ? data.level : 0);
         }, (error) => {
-            console.error("Error fetching water data: ", error);
             updateWaterLevel(0);
         });
 
         function updateWaterLevel(level) {
             const waterLevelElement = document.getElementById('water-level');
             const waterStatusElement = document.getElementById('water-status');
-
             waterLevelElement.style.width = level + '%';
             waterStatusElement.textContent = level + '%';
 
@@ -302,8 +306,164 @@
                 waterLevelElement.style.backgroundColor = '#f9c74f';
             } else {
                 waterLevelElement.style.backgroundColor = '#f94144';
+                if (level <= 20) {
+                    console.log("Water level is 20% or below. Sending notification.");
+                    sendwaterlevelNotification();
+                }
             }
         }
+
+        function sendBatteryNotification() {
+            console.log("sendBatteryNotification function called.");
+
+            const notification = document.createElement('div');
+            notification.classList.add('notification');
+            notification.innerHTML = `
+                <strong>Battery Warning</strong>
+                <p>Battery level is below 20%. Please take necessary actions.</p>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show the notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Automatically hide the notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 5000);
+        }
+
+        function sendwaterlevelNotification() {
+            console.log("sendwaterlevelNotification function called.");
+
+            const notification = document.createElement('div');
+            notification.classList.add('notification');
+            notification.innerHTML = `
+                <strong>Water Level Warning</strong>
+                <p>Water level is below 20%. Please Re-Fill.</p>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show the notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Automatically hide the notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 5000);
+        }
+
+        // Function to download the displayed data as a PDF
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Get current date and time
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+
+            // Gather data to be added to PDF
+            const onlineStatus = document.getElementById('onlinestatus').innerText;
+            const temperature = document.getElementById('temperature').innerText;
+            const humidity = document.getElementById('humidity').innerText;
+            const speed = document.getElementById('speed').innerText;
+            const time = document.getElementById('time').innerText;
+            const batteryStatus = document.getElementById('battery-status').innerText;
+            const waterStatus = document.getElementById('water-status').innerText;
+
+            // Add date and time
+            doc.text(`Date: ${currentDate}`, 14, 10);
+            doc.text(`Time: ${currentTime}`, 14, 20);
+
+            // Define table columns and data
+            const columns = ["Data Type", "Value"];
+            const rows = [
+                ["Online Status", onlineStatus],
+                ["Temperature", temperature],
+                ["Humidity", humidity],
+                ["Speed", speed],
+                ["Flight Time", time],
+                ["Battery Status", batteryStatus],
+                ["Water Level", waterStatus]
+            ];
+
+            // Add the table to the PDF
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: 30
+            });
+
+            // Download the PDF
+            doc.save("Flight_Data.pdf");
+        }
+
+        // Function to toggle minimize/maximize the pop-up bar
+        function toggleMinimize() {
+            const popupBar = document.getElementById('popup-bar');
+            popupBar.classList.toggle('minimized');
+        }
+
+        function closePopup(event) {
+            event.stopPropagation();
+            const popupBar = document.getElementById('popup-bar');
+            popupBar.classList.remove('show');
+            setTimeout(() => {
+                popupBar.style.display = 'none';
+            }, 500);
+        }
+
+        function minimizePopup(event) {
+            event.stopPropagation();
+            const popupBar = document.getElementById('popup-bar');
+            popupBar.classList.add('minimized');
+        }
+
+        function showPopup() {
+            const popupBar = document.getElementById('popup-bar');
+            popupBar.style.display = 'block';
+            setTimeout(() => {
+                popupBar.classList.add('show');
+            }, 10);
+        }
+
+        function updateDashboard(event) {
+            event.stopPropagation();
+            closePopup(event);
+            alert('Dashboard update initiated!');
+        }
+
+        // Set up event listeners after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.close-btn').addEventListener('click', closePopup);
+            document.querySelector('.minimize-btn').addEventListener('click', minimizePopup);
+            document.getElementById('save-data-btn').addEventListener('click', updateDashboard);
+            document.getElementById('download-pdf-btn').addEventListener('click', downloadPDF);
+            document.querySelector('.popup-bar').addEventListener('click', toggleMinimize);
+
+            // Check authentication and redirect if not logged in
+            onAuthStateChanged(auth, (user) => {
+             if (!user) {
+             window.location.href = 'Login.html';
+             }
+            });
+
+            // Show the popup bar after 2 seconds
+            setTimeout(showPopup, 2000);
+        });
+
     </script>
 </body>
 </html>

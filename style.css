@@ -466,3 +466,140 @@ section {
     border-radius: 50%; 
     transition: opacity 0.5s ease-out; 
 }
+
+@media screen and (max-width: 600px) {
+    .parent-container {
+        position: relative; 
+        padding: 10px; 
+        margin: 0; 
+    }
+
+    .popup-bar {
+        width: 40%; 
+        height: auto; 
+        max-width: none; 
+        left: 0; 
+        top: 13%; 
+        transform: none; 
+    }
+
+    .popup-bar.minimized {
+        width: 4%; 
+        height: 70%; 
+        left: 0; 
+        top: 13%; 
+    }
+
+    .camera-feed {
+        width: 85%; 
+        height: auto; 
+        margin: 10px auto;
+    }
+
+    .data-container {
+        width: 79%; 
+        height: auto; 
+        margin: 10px auto; 
+    }
+
+    .drone-details, .onlinestatus {
+        font-size: 14px; 
+        margin-bottom: 10px; 
+        margin-top: 10px; 
+    }
+
+    .battery-container {
+        flex-direction: column; 
+        align-items: stretch; 
+    }
+
+    .battery {
+        width: 100%; 
+        height: auto; 
+    }
+
+    .battery-level {
+        height: 40%; 
+        background-color: #039f34; 
+        border-radius: 5px;
+        transition: width 0.3s;
+    }
+
+    .battery-tip {
+        width: 10px;
+        height: 40px;
+        background-color: #333;
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 2px;
+    }
+
+
+    .notification {
+        width: 90%; 
+        left: 5%; 
+        bottom: 10px; 
+    }
+
+    .speedtime {
+        width: 80%; 
+        height: auto; 
+        display: flex;
+        justify-content: space-between;
+        color: #adadad;
+        font-family: 'Montserrat', sans-serif;
+        background-color: rgb(21, 21, 21);
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+  
+    .map-container {
+        width: 85%; 
+        height: auto; 
+        margin: 10px auto; 
+        padding: 10px; 
+        box-sizing: border-box; 
+    }
+
+    #map {
+        width: 95%; 
+        height: 250px; 
+        border-radius: 20px; 
+    }
+
+
+    .waterlevel-container {
+        width: 80%; 
+        height: 40%; 
+        bottom: -120%; 
+        left: 10%; 
+    }
+
+    .water-tank {
+        width: 100%; 
+        height: auto; 
+        margin-top: 30px; 
+    }
+
+    .button {
+        width: 40%; 
+        margin-left: 30%; 
+        margin-top: 80px; 
+    }
+
+   
+    .compass {
+        width: 70%; 
+        height: 20%; 
+        bottom: -148%; 
+        left: 10%; 
+        margin-top: 10px; 
+    }
+
+    .minimize-icon {
+        display: none;
+    }
+}

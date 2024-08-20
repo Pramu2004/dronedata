@@ -538,7 +538,8 @@ section {
 
     .notification {
         width: 50%; 
-        left: 23%; 
+        left: 23%;
+        height: 8%;
         bottom: 10px; 
     }
 

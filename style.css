@@ -503,9 +503,8 @@ section {
     }
 
     .drone-details, .onlinestatus {
-        font-size: 14px; 
-        margin-bottom: 10px; 
-        margin-top: 10px; 
+        font-size: 12px; 
+        margin-bottom: 5px; 
     }
 
     .battery-container {
@@ -514,12 +513,12 @@ section {
     }
 
     .battery {
-        width: 100%; 
+        width: 95%; 
         height: auto; 
     }
 
     .battery-level {
-        height: 40%; 
+        height: 20%; 
         background-color: #039f34; 
         border-radius: 5px;
         transition: width 0.3s;
@@ -544,7 +543,7 @@ section {
     }
 
     .speedtime {
-        width: 80%; 
+        width: 94%; 
         height: auto; 
         display: flex;
         justify-content: space-between;
@@ -574,7 +573,7 @@ section {
     .waterlevel-container {
         width: 80%; 
         height: 40%; 
-        bottom: -120%; 
+        bottom: -110%; 
         left: 10%; 
     }
 
@@ -594,7 +593,7 @@ section {
     .compass {
         width: 70%; 
         height: 20%; 
-        bottom: -148%; 
+        bottom: -140%; 
         left: 10%; 
         margin-top: 10px; 
     }

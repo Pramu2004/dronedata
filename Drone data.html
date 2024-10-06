@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body {
-            background-color: #000000; 
+            background-color: #0d0f20; 
             background-size: cover; 
             background-position: center; 
             background-repeat: no-repeat; 
@@ -52,6 +52,7 @@
         #logout-btn:hover {
             background-color: #cc0000;
         }
+
     </style>
 </head>
 <body>
@@ -128,13 +129,34 @@
                     <p class="d" id="time">Loading...</p>
                 </div>
             </div>
+
+            <div class="Altitudeh">
+                <div class="htdata">
+                    <h3 style="margin-right: 2px;">
+                        <img src="Altitude.png" alt="altitude icon" width="25" height="25" style="vertical-align: middle;">
+                        Altitude</h3>
+                    <p class="d" id="altitude">Loading...</p>
+                </div>
+                <div class="stdata">
+                    <h3 style="margin-right: 2px;">
+                        <img src="time-left.png" alt="time icon" width="25" height="25" style="vertical-align: middle;">
+                        Pressure</h3>
+                    <p class="d" id="time">Loading...</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="compass">
-        <h4>Drone</h4>
-        <div class="compass-circle"></div>
+        <h4>GYROSCOPE</h4>
+        <div class="Gyro">
+            <p><span class="reading">X: <span id="gyroX"></span></p>
+            <p><span class="reading">Y: <span id="gyroY"></span></p>
+            <p><span class="reading">Z: <span id="gyroZ"></span></p>
+        </div>
+        <div id="3Dcube" style="width: 100%; height: 200px; margin-top: -40%;"></div> <!-- 3D Cube section -->
     </div>
+    
 
     <div class="map-container">
         <div class="datamap"></div>
@@ -151,7 +173,9 @@
             </div>
 
             <div class="Button">
-                <button class="button">START</button>
+                <button class="button">
+                    <p>START</p>
+                </button>
             </div>
         </div>
     </div>
@@ -162,6 +186,8 @@
     <!-- jsPDF library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 
     <!-- JavaScript code -->
     <script type="module">
@@ -211,6 +237,7 @@
         const batteryRef = ref(database, 'Battery/Data');
         const speedRef = ref(database, 'Accelerometer/Data');
         const waterRef = ref(database, 'Water level/Data');
+        const gyroRef = ref(database, 'Gyroscope/Data')
 
         // Online status
         onValue(onlineRef, (snapshot) => {
@@ -245,7 +272,7 @@
             batteryStatus.textContent = level + '%';
 
             if (level > 50) {
-                batteryLevel.style.backgroundColor = '#039f34';
+                batteryLevel.style.backgroundColor = '#fcb10e';
             } else if (level > 20) {
                 batteryLevel.style.backgroundColor = '#f9c74f';
             } else {
@@ -258,33 +285,57 @@
         }
 
         // Speed data
-        onValue(speedRef, (snapshot) => {
+        onValue(locationRef, (snapshot) => {
             const data = snapshot.val();
             document.getElementById('speed').innerHTML = data ? `${data.Speed} m/s` : "No data";
         }, (error) => {
             document.getElementById('speed').innerHTML = "Error";
         });
 
-        // Location data
-        const map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        let marker = L.marker([0, 0]).addTo(map);
-
         onValue(locationRef, (snapshot) => {
-            const locationData = snapshot.val();
-            if (locationData) {
-                const { Lattitude: latitude, Longitude: longitude } = locationData;
-                if (latitude !== null && longitude !== null) {
-                    const latLng = [latitude, longitude];
-                    map.setView(latLng, 13);
-                    marker.setLatLng(latLng);
-                }
-            }
+            const data = snapshot.val();
+            document.getElementById('altitude').innerHTML = data ? `${data.Altitude} m` : "No data";
         }, (error) => {
-            console.error("Error fetching location data:", error);
+            document.getElementById('altitude').innerHTML = "Error";
         });
+        
+
+        // Initialize the map with a global view (zoomed out)
+const map = L.map('map').setView([0, 0], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Initialize marker and polyline for tracking the path
+let marker = L.marker([0, 0]).addTo(map);
+let polyline = L.polyline([], { color: 'blue' }).addTo(map);
+let trackingCoordinates = [];
+
+// Listen to Firebase for location data updates
+onValue(locationRef, (snapshot) => {
+    const locationData = snapshot.val();
+    if (locationData) {
+        const { Lattitude: latitude, Longitude: longitude } = locationData;
+        if (latitude !== null && longitude !== null) {
+            const latLng = [latitude, longitude];
+
+            // Update the map view to the new location
+            map.setView(latLng, 17);  // Zoom level 17 is street-level
+
+            // Update marker position
+            marker.setLatLng(latLng);
+
+            // Add the new coordinates to the tracking array
+            trackingCoordinates.push(latLng);
+
+            // Update the polyline with the new path
+            polyline.setLatLngs(trackingCoordinates);
+        }
+    }
+}, (error) => {
+    console.error("Error fetching location data:", error);
+});
+
 
         // Water level data
         onValue(waterRef, (snapshot) => {
@@ -293,6 +344,80 @@
         }, (error) => {
             updateWaterLevel(0);
         });
+
+        // Gyroscope data and 3D cube setup
+
+// Initialize 3D Cube
+let scene, camera, renderer, droneBody, propeller1, propeller2, propeller3, propeller4;
+let gyroData = { x: 0, y: 0, z: 0 }; // Default gyro data
+
+function init3D() {
+    const width = document.getElementById('3Dcube').clientWidth;
+    const height = document.getElementById('3Dcube').clientHeight;
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.z = 5;
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    document.getElementById('3Dcube').appendChild(renderer.domElement);
+
+    // Drone body (flat rectangular box)
+    const bodyGeometry = new THREE.BoxGeometry(3.5, 0.6, 4.5);
+    const bodyMaterial = new THREE.MeshBasicMaterial({
+        color: 0xfcb10e, // Gray color for the drone body
+        wireframe: false
+    });
+    droneBody = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    scene.add(droneBody);
+    animate();
+}
+
+// Animation loop with gyro data
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Smooth drone body rotation based on gyroscope data
+    droneBody.rotation.x += (gyroData.x - droneBody.rotation.x) * 0.05;
+    droneBody.rotation.y += (gyroData.y - droneBody.rotation.y) * 0.05;
+    droneBody.rotation.z += (gyroData.z - droneBody.rotation.z) * 0.05;
+
+
+    renderer.render(scene, camera);
+}
+
+// Fetch gyroscope data and update rotation
+onValue(gyroRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.gyroscope) {
+        const { x, y, z } = data.gyroscope;
+
+        // Update gyroscope data
+        gyroData = { x, y, z };
+
+        // Display gyroscope readings
+        document.getElementById('gyroX').innerHTML = `${x.toFixed(2)} rad`;
+        document.getElementById('gyroY').innerHTML = `${y.toFixed(2)} rad`;
+        document.getElementById('gyroZ').innerHTML = `${z.toFixed(2)} rad`;
+    }
+});
+
+// Resize handler for the 3D scene
+window.addEventListener('resize', () => {
+    const width = document.getElementById('3Dcube').clientWidth;
+    const height = document.getElementById('3Dcube').clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+});
+
+// Initialize the 3D drone shape
+init3D();
+
+
+
 
         function updateWaterLevel(level) {
             const waterLevelElement = document.getElementById('water-level');
@@ -379,6 +504,7 @@
             const temperature = document.getElementById('temperature').innerText;
             const humidity = document.getElementById('humidity').innerText;
             const speed = document.getElementById('speed').innerText;
+            const altitude = document.getElementById('altitude').innerText;
             const time = document.getElementById('time').innerText;
             const batteryStatus = document.getElementById('battery-status').innerText;
             const waterStatus = document.getElementById('water-status').innerText;
@@ -394,6 +520,7 @@
                 ["Temperature", temperature],
                 ["Humidity", humidity],
                 ["Speed", speed],
+                ["Altitude", altitude],
                 ["Flight Time", time],
                 ["Battery Status", batteryStatus],
                 ["Water Level", waterStatus]

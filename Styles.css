@@ -132,6 +132,7 @@
     margin-left: 4%;
     align-content: center;
     overflow: hidden;
+    position: relative; /* Enable relative positioning for child elements */
 }
 
 .camera-feed img {
@@ -140,6 +141,82 @@
     border-radius: 8px;
     object-fit: cover;
 }
+
+/* Button Container */
+.cambutton-container {
+    display: flex;
+    gap: 10px;
+    position: absolute; /* Position the button container absolutely */
+    bottom: 10px; /* Push it 10px from the bottom */
+    right: 10px; /* Push it 10px from the right */
+}
+
+/* Styling the Buttons */
+.cambutton-container button {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50%;
+    background-color: #fcb10e;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Button Hover Effect */
+.cambutton-container button:hover {
+    background-color: #fcb10e;
+}
+
+/* Styling the Buttons */
+.cambutton-container button {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    border: none;
+    border-radius: 7%;
+    background-color: #fcb10e;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Button Hover Effect */
+.cambutton-container button:hover {
+    background-color: #e9a30d;
+}
+
+/* Servo Position Display */
+.servo-display {
+    font-size: 30px;
+    font-weight: 500;
+    color: #333;
+    position: absolute; /* Position the button container absolutely */
+    bottom: 15px; /* Push it 10px from the bottom */
+    right: 140px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .camera-feed {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .cambutton-container button {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .servo-display {
+        font-size: 18px;
+    }
+}
+
 
 /* Data Container Styles */
 .data-container {
